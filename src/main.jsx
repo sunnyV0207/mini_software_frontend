@@ -6,6 +6,9 @@ import App from './App.jsx'
 import {RouterProvider, createBrowserRouter} from "react-router-dom";
 import Home from './Components/Home/Home.jsx';
 import Login from './Components/Login/Login.jsx';
+import ForgotPassword from './Components/ForgotPassword/ForgotPassword.jsx';
+import VerifyOtp from './Components/VerifyOtp/VerifyOtp.jsx';
+import ResetPassword from './Components/ResetPassword/ResetPassword.jsx';
 
 const router = createBrowserRouter([
   {
@@ -19,6 +22,18 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />
+      },
+      {
+        path: "forgot-password",
+        element: <ForgotPassword />
+      },
+      {
+        path: "verify-otp",
+        element: <VerifyOtp />
+      },
+      {
+        path: "reset-password",
+        element: <ResetPassword />
       }
     ]
   },
