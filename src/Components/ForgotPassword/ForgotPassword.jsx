@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -8,7 +9,13 @@ export default function ForgotPassword() {
 
   const handleSendOtp = (e) => {
     e.preventDefault();
-
+    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/send-otp`, { email },{withCredentials:true})
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("There was an error sending the OTP!", error);
+      });
     // After backend sends OTP successfully:
     navigate("/verify-otp", { state: { email } });
   };

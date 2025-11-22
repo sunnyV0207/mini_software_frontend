@@ -9,6 +9,7 @@ import Login from './Components/Login/Login.jsx';
 import ForgotPassword from './Components/ForgotPassword/ForgotPassword.jsx';
 import VerifyOtp from './Components/VerifyOtp/VerifyOtp.jsx';
 import ResetPassword from './Components/ResetPassword/ResetPassword.jsx';
+import { SuperAdminDashboard } from './Components/SuperAdminDashboard/SuperAdminDashboard.jsx';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "reset-password",
         element: <ResetPassword />
+      },
+      {
+        path: 'super-admin/dashboard',
+        element: <SuperAdminDashboard />
       }
     ]
   },
