@@ -21,6 +21,7 @@ import axios from "axios";
 export const SuperAdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [Loading,setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -31,10 +32,10 @@ export const SuperAdminDashboard = () => {
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/stats`);
         // console.log(response.data.data);
         setStats(response.data.data);
-        // setLoading(false);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching stats:", error);
-        // setLoading(false);
+        setLoading(false);
       }
     };
 
@@ -148,42 +149,42 @@ export const SuperAdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <DashboardCard
             title="Total Schools"
-            count={stats ? stats.SchoolCount : '0'}
+            count={Loading ? 'Loading...' : (stats ? stats.SchoolCount : '0')}
             icon={<FaSchool size={35} />}
             color="bg-indigo-600"
           />
 
           <DashboardCard
             title="Principals"
-            count={stats ? stats.PrincipalCount : '0'}
+            count={Loading ? 'Loading...' : (stats ? stats.PrincipalCount : '0')}
             icon={<FaUserTie size={35} />}
             color="bg-green-600"
           />
 
           <DashboardCard
             title="Teachers"
-            count={stats ? stats.TeacherCount : '0'}
+            count={ Loading ? 'Loading...' : (stats ? stats.TeacherCount : '0')}
             icon={<FaChalkboardTeacher size={35} />}
             color="bg-blue-600"
           />
 
           <DashboardCard
             title="Students"
-            count={stats ? stats.StudentCount : '0'}
+            count={ Loading ? 'Loading...' : (stats ? stats.StudentCount : '0')}
             icon={<FaUserGraduate size={35} />}
             color="bg-purple-600"
           />
 
           <DashboardCard
             title="Parents"
-            count={stats ? stats.ParentCount : '0'}
+            count={ Loading ? 'Loading...' : (stats ? stats.ParentCount : '0')}
             icon={<FaUsers size={35} />}
             color="bg-pink-600"
           />
 
           <DashboardCard
             title="Admins"
-            count={stats ? stats.SuperAdminCount : '0'}
+            count={ Loading ? 'Loading...' : (stats ? stats.SuperAdminCount : '0')}
             icon={<FaUserShield size={35} />}
             color="bg-gray-700"
           />
