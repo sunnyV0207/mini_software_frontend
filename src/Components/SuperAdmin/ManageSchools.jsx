@@ -17,14 +17,12 @@ const ManageSchools = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch schools
   useEffect(() => {
     const fetchSchools = async () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/school/fetch-schools`
         );
-        console.log(res.data.data.schools)
 
         const schoolArray = Array.isArray(res.data.data.schools)
           ? res.data.data.schools
@@ -42,7 +40,6 @@ const ManageSchools = () => {
     fetchSchools();
   }, []);
 
-  // Handle search
   useEffect(() => {
     const filtered = schools.filter((school) =>
       school.schoolName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -51,60 +48,55 @@ const ManageSchools = () => {
   }, [searchQuery, schools]);
 
   return (
-    <div className="p-6 animate-fadeIn">
+    <div className="p-4 sm:p-6 animate-fadeIn">
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold text-gray-800 tracking-tight">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 tracking-tight">
           Manage Schools
         </h1>
 
         <button
           onClick={() => (navigate('/super-admin/add-school'))}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl shadow-md transition-all"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-xl shadow-md transition-all w-full sm:w-auto justify-center"
         >
           <Plus size={20} />
           Add School
         </button>
       </div>
 
-      {/* SEARCH BAR */}
-      <div className="mb-6">
-        <div className="flex items-center w-full gap-3 bg-gray-50 border border-gray-300 px-4 py-3 rounded-xl shadow-sm focus-within:border-indigo-500 transition-all">
+      <div className="mb-6 w-full">
+        <div className="flex items-center w-full gap-3 bg-gray-50 border border-gray-300 px-3 sm:px-4 py-2 sm:py-3 rounded-xl shadow-sm focus-within:border-indigo-500 transition-all">
           <Search size={20} className="text-indigo-600" />
           <input
             type="text"
             placeholder="Search school by name..."
-            className="w-full bg-transparent outline-none"
+            className="w-full bg-transparent outline-none text-sm sm:text-base"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      {/* LOADING STATE */}
       {loading && (
-        <div className="text-center py-10 text-gray-600">
+        <div className="text-center py-10 text-gray-600 text-sm sm:text-base">
           Loading schools…
         </div>
       )}
 
-      {/* EMPTY STATE */}
       {!loading && filteredSchools.length === 0 && (
-        <div className="text-center py-10 text-gray-600 bg-gray-100 rounded-xl">
+        <div className="text-center py-10 text-gray-600 bg-gray-100 rounded-xl text-sm sm:text-base">
           No schools found.
         </div>
       )}
 
-      {/* SCHOOLS LIST */}
       <div className="space-y-4">
         {filteredSchools.map((school) => (
           <div
             key={school._id}
-            className="flex justify-between items-center p-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all gap-4"
           >
-            <div onClick={()=>navigate(`/super-admin/school/${school.schoolCode}`)}>
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <div className="w-full" onClick={()=>navigate(`/super-admin/school/${school.schoolCode}`)}>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
                 <SchoolIcon size={20} className="text-indigo-600" />
                 {school.schoolName}
               </h2>
@@ -115,21 +107,20 @@ const ManageSchools = () => {
 
               <p className="text-gray-600 text-sm flex items-center gap-2 mt-1">
                 <User size={16} className="text-indigo-600" />
-                Principal:{" "}
+                Principal: {" "}
                 <span className="font-medium">
                   {school.principal ? school.principal.name : "Not Assigned"}
                 </span>
               </p>
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="flex gap-3">
-              <button onClick={()=>navigate(`/super-admin/school/${school.schoolCode}`)} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl transition-all">
+            <div className="flex gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <button onClick={()=>navigate(`/super-admin/school/${school.schoolCode}`)} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
                 <Eye size={18} />
                 View
               </button>
 
-              <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-all">
+              <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
                 <RefreshCw size={18} />
                 Renew
               </button>
