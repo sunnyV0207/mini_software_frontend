@@ -16,7 +16,7 @@ export default function ForgotPassword() {
         navigate("/verify-otp", { state: { email } });
       })
       .catch((error) => {
-        // console.error("There was an error sending the OTP!", error);
+        console.error("There was an error sending the OTP!", error);
         const message = error.response.data.message;
         Swal.fire({
           icon: 'error',
