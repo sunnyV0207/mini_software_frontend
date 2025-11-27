@@ -5,10 +5,12 @@ import {
   Search,
   Eye,
   RefreshCw,
+  Ban,
   School as SchoolIcon,
   User
 } from "lucide-react";
 import {useNavigate} from 'react-router-dom';
+import Swal from "sweetalert2"; 
 
 const ManageSchools = () => {
     const navigate = useNavigate();
@@ -46,6 +48,59 @@ const ManageSchools = () => {
     );
     setFilteredSchools(filtered);
   }, [searchQuery, schools]);
+
+  const deactivateSchool = (schoolId) => {
+
+    Swal.fire({
+        title: "Deactivate School",
+        text: "Are you sure you want to deactivate this school? You can reactivate it later.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Deactivate",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#4F46E5",  // Indigo
+        cancelButtonColor: "#6B7280"    // Gray
+    }).then(async(result) => {
+    if (result.isConfirmed) {
+        try {
+          await axios.patch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/school/update-school-status/${schoolId}`
+          );
+          setSchools((prevSchools) =>
+            prevSchools.map((school) =>
+              school._id === schoolId ? { ...school, status: "Inactive" } : school
+            )
+          );
+        } catch (error) {
+          console.error("Error deactivating school:", error);
+        }
+    }
+    }); 
+  };
+
+  const renewSchool = (schoolId) => {
+    Swal.fire({
+        title: "Renew School",
+        text: "Are you sure you want to renew this school?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Renew",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#4F46E5",  // Indigo
+        cancelButtonColor: "#6B7280"    // Gray
+    }).then(async (result) => {
+    if (result.isConfirmed) {
+        axios.patch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/school/update-school-status/${schoolId}`
+          );
+          setSchools((prevSchools) =>
+            prevSchools.map((school) =>
+              school._id === schoolId ? { ...school, status: "Active" } : school
+            )
+          );
+    }
+    }); 
+  };
 
   return (
     <div className="p-4 sm:p-6 animate-fadeIn">
@@ -115,15 +170,26 @@ const ManageSchools = () => {
             </div>
 
             <div className="flex gap-3 w-full sm:w-auto justify-between sm:justify-end">
-              <button onClick={()=>navigate(`/super-admin/school/${school.schoolCode}`)} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
+              <button onClick={()=>navigate(`/super-admin/school/${school.schoolCode}`)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
                 <Eye size={18} />
                 View
               </button>
 
-              <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
-                <RefreshCw size={18} />
-                Renew
-              </button>
+              {
+                school.status === "Active" ? 
+                (
+                  <button onClick={()=>deactivateSchool(school._id)} className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
+                    <Ban size={18} />
+                    Deactivate
+                  </button>
+                ) :
+                (
+                  <button onClick={()=>renewSchool(school._id)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all w-full sm:w-auto justify-center text-sm">
+                    <RefreshCw size={18} />
+                    Renew
+                  </button>
+                )
+              }
             </div>
           </div>
         ))}

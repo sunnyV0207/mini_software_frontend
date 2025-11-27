@@ -98,7 +98,7 @@ export const SuperAdminDashboard = () => {
           <a onClick={()=>navigate('/super-admin/manage-schools')} className="flex items-center gap-3 hover:text-indigo-300 transition cursor-pointer">
             <FaSchool /> Manage Schools
           </a>
-          <a className="flex items-center gap-3 hover:text-indigo-300 transition cursor-pointer">
+          <a onClick={()=>navigate('/super-admin/manage-principals')} className="flex items-center gap-3 hover:text-indigo-300 transition cursor-pointer">
             <FaUsers /> Manage Principals
           </a>
           <a className="flex items-center gap-3 hover:text-indigo-300 transition cursor-pointer">

@@ -14,7 +14,9 @@ import { SuperAdminDashboard } from './Components/SuperAdmin/SuperAdminDashboard
 import { AddPrincipalForm } from './Components/SuperAdmin/AddPrincipal.jsx';
 import { AddSchool } from './Components/SuperAdmin/AddSchool.jsx';
 import { ManageSchools } from './Components/SuperAdmin/ManageSchools.jsx';
+import { ManagePrincipals } from './Components/SuperAdmin/ManagePrincipals.jsx';
 import { ParticularSchool } from './Components/SuperAdmin/ParticulaSchool.jsx';
+import { ParticularPrincipal } from './Components/SuperAdmin/ParticularPrincipal.jsx';
 import { EditSchool } from './Components/SuperAdmin/EditSchool.jsx';
 import { EditPrincipal } from './Components/SuperAdmin/EditPrincipal.jsx';
 import { ResetPassword as ResetPrincipalPassword } from './Components/SuperAdmin/ResetPassword.jsx';
@@ -70,15 +72,23 @@ const router = createBrowserRouter([
             element: <ManageSchools />
           },
           {
+            path: 'manage-principals',
+            element: <ManagePrincipals />
+          },
+          {
             path: 'school/:schoolCode',
             element: <ParticularSchool />
+          },
+          {
+            path: 'principal/:principalId',
+            element: <ParticularPrincipal />
           },
           {
             path: 'school/:schoolCode/edit',
             element: <EditSchool />
           },
           {
-            path: 'school/:schoolCode/edit-principal',
+            path: 'principal/:principalId/edit',
             element: <EditPrincipal />
           },
           {
