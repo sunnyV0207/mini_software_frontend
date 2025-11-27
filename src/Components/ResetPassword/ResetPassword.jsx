@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -9,22 +11,44 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const email = useLocation().state?.email;
 
-  const handleReset = (e) => {
+  const handleReset = async(e) => {
     e.preventDefault();
 
     if (password.length < 6) {
-      alert("Password must be at least 6 characters.");
+      // alert("Password must be at least 6 characters.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Password must be at least 6 characters.',
+      });
       return;
     }
 
     if (password !== confirm) {
-      alert("Passwords do not match.");
+      // alert("Passwords do not match.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Passwords do not match.',
+      });
       return;
     }
 
     // Backend reset password logic should be here
-
-    navigate("/login");
+    try {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/reset-password`, {
+        email,
+        newPassword: password,
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong while resetting the password.',
+      });
+    }
   };
 
   return (

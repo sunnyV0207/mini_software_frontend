@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function VerifyOtp() {
   const inputsRef = useRef([]);
@@ -9,15 +11,43 @@ export default function VerifyOtp() {
 
   const email = location.state?.email || "";
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [loading, setLoading] = useState(false); // disable button
 
+  // --------------------------
+  // TIMER → 5 minutes countdown
+  // --------------------------
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          navigate("/login"); // auto-redirect after timeout
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [navigate]);
+
+  const formatTime = () => {
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    return `${m}:${s < 10 ? "0" + s : s}`;
+  };
+
+  // --------------------------
+  // OTP Input Handling
+  // --------------------------
   const handleChange = (value, index) => {
-    if (!/^[0-9]?$/.test(value)) return; // allow only digits
+    if (!/^[0-9]?$/.test(value)) return;
 
     const newOtp = [...otpDigits];
     newOtp[index] = value;
     setOtpDigits(newOtp);
 
-    // Move to next input automatically
     if (value && index < 5) {
       inputsRef.current[index + 1].focus();
     }
@@ -29,17 +59,34 @@ export default function VerifyOtp() {
     }
   };
 
-  const handleSubmit = (e) => {
+  // --------------------------
+  // Submit OTP
+  // --------------------------
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const otp = otpDigits.join("");
 
+    const otp = otpDigits.join("");
     if (otp.length !== 6) {
       alert("Please enter all 6 digits!");
       return;
     }
 
-    // If OTP correct → Redirect user to reset password page
-    navigate("/reset-password", { state: { email } });
+    setLoading(true); // disable button
+
+    try {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/verify-otp`, { email, otp }, { withCredentials: true });
+      navigate("/reset-password", { state: { email } });
+    } catch (err) {
+      console.error(err);
+      // alert("Something went wrong!");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.response.data.message,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,13 +100,17 @@ export default function VerifyOtp() {
           Verify OTP
         </h1>
 
-        <p className="text-gray-400 text-center mb-6">
-          Enter the 6-digit OTP sent to 
+        <p className="text-gray-400 text-center mb-3">
+          Enter the 6-digit OTP sent to
           <span className="text-indigo-300"> {email} </span>
         </p>
 
+        {/* TIMER */}
+        <p className="text-center text-red-400 font-semibold mb-6">
+          OTP expires in: {formatTime()}
+        </p>
+
         <form onSubmit={handleSubmit}>
-          {/* OTP Inputs */}
           <div className="flex justify-between gap-3 mb-8">
             {otpDigits.map((digit, index) => (
               <input
@@ -78,11 +129,15 @@ export default function VerifyOtp() {
           </div>
 
           <motion.button
-            whileTap={{ scale: 0.95 }}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold 
-            rounded-lg shadow-lg hover:shadow-indigo-500/40 transition"
+            whileTap={!loading ? { scale: 0.95 } : {}}
+            disabled={loading}
+            className={`w-full py-3 rounded-lg font-semibold text-white transition
+              ${loading
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/40"
+              }`}
           >
-            Verify OTP
+            {loading ? "Verifying..." : "Verify OTP"}
           </motion.button>
         </form>
       </motion.div>

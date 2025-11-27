@@ -26,9 +26,11 @@ export default function Login() {
     // Handle login logic here
     axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/user/login`,{email,password},{withCredentials:true})
     .then((res)=>{
+      const user = res.data.data.user;
+      localStorage.setItem("user", JSON.stringify(user));
       const role = res.data.data.user.role
       if(role === "Super Admin"){
-        navigate('/super-admin/dashboard');
+        navigate('/super-admin');
       }
     })
     .catch((err)=>{

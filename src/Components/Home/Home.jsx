@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion,AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function LandingPage() {
 
@@ -13,6 +15,49 @@ export default function LandingPage() {
 
   const [currentImage, setCurrentImage] = useState(0);
   const [menuOpen,setMenuOpen]=useState(false);
+  const [name,setName]=useState("");
+  const [email,setEmail]=useState("");
+  const [message,setMessage]=useState("");
+  const [loading,setLoading]=useState(false);
+
+  const handleChange=(e)=>{
+    const {name,value}=e.target;
+    if(name==="name") setName(value);
+    else if(name==="email") setEmail(value);
+    else if(name==="message") setMessage(value);
+  }
+
+  const handleSubmit= async(e)=>{
+    e.preventDefault();
+    // Handle form submission logic here
+    // console.log("Form submitted:", { name, email, message });
+    setLoading(true);
+    
+    try {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/user/contact`, {
+        name,
+        email,
+        message
+      });
+      Swal.fire({
+        icon: 'success',
+        title: 'Message Sent',
+        text: 'Your message has been sent successfully. We will get back to you soon!',
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong while sending your message. Please try again later.',
+      });
+    } finally {
+      // Clear form fields
+      setName("");
+      setEmail("");
+      setMessage("");
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -451,24 +496,33 @@ export default function LandingPage() {
       >
         <h3 className="text-2xl font-bold text-indigo-300 mb-6">Send a Message</h3>
 
-        <form className="space-y-6">
+        <form className="space-y-6"  onSubmit={handleSubmit}>
           <motion.input
             whileFocus={{ scale: 1.02 }}
             type="text"
             placeholder="Your Name"
+            name="name"
+            value={name}
+            onChange={handleChange}
             className="w-full p-4 rounded-lg bg-[#232441] border border-indigo-900/40 text-white placeholder-gray-400 focus:outline-none"
           />
 
           <motion.input
             whileFocus={{ scale: 1.02 }}
             type="email"
+            name="email"
             placeholder="Your Email"
+            value={email}
+            onChange={handleChange}
             className="w-full p-4 rounded-lg bg-[#232441] border border-indigo-900/40 text-white placeholder-gray-400 focus:outline-none"
           />
 
           <motion.textarea
             whileFocus={{ scale: 1.02 }}
             placeholder="Your Message"
+            name="message"
+            value={message}
+            onChange={handleChange}
             rows="5"
             className="w-full p-4 rounded-lg bg-[#232441] border border-indigo-900/40 text-white placeholder-gray-400 focus:outline-none"
           />
@@ -476,9 +530,11 @@ export default function LandingPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
+            type="submit"
             className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 transition rounded-lg font-semibold shadow-lg"
+            disabled={loading}
           >
-            Send Message
+            {loading ? "Sending..." : "Send Message"}
           </motion.button>
         </form>
       </motion.div>
