@@ -149,42 +149,42 @@ export const SuperAdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <DashboardCard
             title="Total Schools"
-            count={Loading ? 'Loading...' : (stats ? stats.SchoolCount : '0')}
+            count={Loading ? <Spinner /> : (stats ? stats.SchoolCount : '0')}
             icon={<FaSchool size={35} />}
             color="bg-indigo-600"
           />
 
           <DashboardCard
             title="Principals"
-            count={Loading ? 'Loading...' : (stats ? stats.PrincipalCount : '0')}
+            count={Loading ? <Spinner /> : (stats ? stats.PrincipalCount : '0')}
             icon={<FaUserTie size={35} />}
             color="bg-green-600"
           />
 
           <DashboardCard
             title="Teachers"
-            count={ Loading ? 'Loading...' : (stats ? stats.TeacherCount : '0')}
+            count={ Loading ? <Spinner /> : (stats ? stats.TeacherCount : '0')}
             icon={<FaChalkboardTeacher size={35} />}
             color="bg-blue-600"
           />
 
           <DashboardCard
             title="Students"
-            count={ Loading ? 'Loading...' : (stats ? stats.StudentCount : '0')}
+            count={ Loading ? <Spinner /> : (stats ? stats.StudentCount : '0')}
             icon={<FaUserGraduate size={35} />}
             color="bg-purple-600"
           />
 
           <DashboardCard
             title="Parents"
-            count={ Loading ? 'Loading...' : (stats ? stats.ParentCount : '0')}
+            count={ Loading ? <Spinner /> : (stats ? stats.ParentCount : '0')}
             icon={<FaUsers size={35} />}
             color="bg-pink-600"
           />
 
           <DashboardCard
             title="Admins"
-            count={ Loading ? 'Loading...' : (stats ? stats.SuperAdminCount : '0')}
+            count={ Loading ? <Spinner /> : (stats ? stats.SuperAdminCount : '0')}
             icon={<FaUserShield size={35} />}
             color="bg-gray-700"
           />
@@ -226,4 +226,8 @@ const DashboardCard = ({ title, count, icon, color }) => (
     </div>
     <div>{icon}</div>
   </motion.div>
+);
+
+const Spinner = () => (
+  <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
 );
