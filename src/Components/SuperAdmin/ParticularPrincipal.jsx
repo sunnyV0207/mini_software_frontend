@@ -11,6 +11,7 @@ import {
   Trash2,
   ShieldCheck
 } from "lucide-react";
+import Swal from "sweetalert2";
 
 const ParticularPrincipal = () => {
   const { principalId } = useParams();
@@ -36,6 +37,34 @@ const ParticularPrincipal = () => {
   useEffect(() => {
     fetchPrincipal();
   }, []);
+
+  const deletePrincipal = async () => {
+    await axios.delete(
+      `${import.meta.env.VITE_BACKEND_URL}/api/principal/${principalId}/delete`
+    ).then((res) => {
+      alert("Principal removed successfully.");
+      navigate("/super-admin/manage-principals");
+    }).catch((err) => {
+      console.error("Error removing principal:", err);
+      alert("Failed to remove principal. Please try again.");
+    });
+  };
+
+  const removePrincipal = async () => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "This action cannot be undone!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove principal!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deletePrincipal();
+      }
+    });
+  };
 
   if (loading) {
     return <p className="p-10 text-gray-600">Loading principal details...</p>;
@@ -175,7 +204,7 @@ const ParticularPrincipal = () => {
         </button>
 
         <button
-          onClick={() => alert("Delete logic coming soon!")}
+          onClick={removePrincipal}
           className="px-6 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-2 shadow"
         >
           <Trash2 size={20} />

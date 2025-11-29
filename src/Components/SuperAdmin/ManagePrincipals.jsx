@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, User, School, Eye, Trash2, PlusCircle } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const ManagePrincipals = () => {
   const [principals, setPrincipals] = useState([]);
@@ -33,6 +34,36 @@ const ManagePrincipals = () => {
   useEffect(() => {
     fetchPrincipals();
   }, []);
+
+  const deletePrincipal = async (principalId) => {
+    await axios.delete(
+      `${import.meta.env.VITE_BACKEND_URL}/api/principal/${principalId}/delete`
+    ).then((res) => {
+      setPrincipals(principals.filter(p => p._id !== principalId));
+      setFilteredPrincipals(filteredPrincipals.filter(p => p._id !== principalId));
+      alert("Principal removed successfully.");
+      navigate("/super-admin/manage-principals");
+    }).catch((err) => {
+      console.error("Error removing principal:", err);
+      alert("Failed to remove principal. Please try again.");
+    });
+  };
+
+  const removePrincipal = async (principalId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "This action cannot be undone!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove principal!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deletePrincipal(principalId);
+      }
+    });
+  };
 
   // Search handler
   const handleSearch = (e) => {
@@ -99,13 +130,12 @@ const ManagePrincipals = () => {
             >
               
               {/* Principal Info */}
-              <div>
+              <div className="cursor-pointer" onClick={() => handleViewPrincipal(principal._id)}>
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                   <User size={22} className="text-indigo-600" />
                   {principal.name}
                 </h2>
                 <p className="text-gray-600 mt-1">{principal.email}</p>
-
                 {/* School info */}
                 <p className="text-gray-700 flex items-center gap-2 mt-2">
                   <School size={18} className="text-indigo-500" />
@@ -124,7 +154,7 @@ const ManagePrincipals = () => {
                 </button>
 
                 <button
-                  onClick={() => alert("Remove functionality coming soon")}
+                  onClick={()=>removePrincipal(principal._id)}
                   className="flex items-center gap-2 border border-red-600 text-red-600 px-4 py-2 rounded-xl hover:bg-red-50 transition-all"
                 >
                   <Trash2 size={18} />
