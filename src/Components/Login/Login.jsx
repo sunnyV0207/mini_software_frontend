@@ -31,6 +31,8 @@ export default function Login() {
       const role = res.data.data.user.role
       if(role === "Super Admin"){
         navigate('/super-admin');
+      }else if(role === "Principal"){
+        navigate('/school');
       }
     })
     .catch((err)=>{

@@ -21,6 +21,10 @@ import { EditSchool } from './Components/SuperAdmin/EditSchool.jsx';
 import { EditPrincipal } from './Components/SuperAdmin/EditPrincipal.jsx';
 import { ResetPassword as ResetPrincipalPassword } from './Components/SuperAdmin/ResetPassword.jsx';
 import { ReassignPrincipal } from './Components/SuperAdmin/ReassignPrincipal.jsx';
+import { SchoolLayout } from './Components/School/SchoolLayout.jsx';
+import { SchoolDashboard } from './Components/School/SchoolDashboard.jsx';
+import { AddClass } from './Components/School/AddClass.jsx';
+import { AddTeacher } from './Components/School/AddTeacher.jsx';
 
 const router = createBrowserRouter([
   {
@@ -98,6 +102,28 @@ const router = createBrowserRouter([
           {
             path: 'school/:schoolCode/re-assign-principal',
             element: <ReassignPrincipal />
+          }
+        ]
+      },
+      {
+        path: "school",
+        element: <SchoolLayout />,
+        children: [
+          {
+            index: true,
+            element: <SchoolDashboard />
+          },
+          {
+            path: "dashboard",
+            element: <SchoolDashboard />
+          },
+          {
+            path: ":schoolCode/classes/add",
+            element: <AddClass />
+          },
+          {
+            path: ':schoolCode/teachers/add',
+            element: <AddTeacher />
           }
         ]
       }
