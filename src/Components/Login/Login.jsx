@@ -1,16 +1,18 @@
 import { use, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message,setMessage] = useState(location.state?.message || '')
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,11 +38,12 @@ export default function Login() {
       }
     })
     .catch((err)=>{
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: err.response.data.message,
-      });
+      setMessage(err.response?.data?.message)
+      // Swal.fire({
+      //   icon: 'error',
+      //   title: 'Login Failed',
+      //   text: err.response.data.message,
+      // });
     });
   }
 
@@ -55,6 +58,8 @@ export default function Login() {
         <h1 className="text-3xl font-bold text-center text-indigo-400 mb-6">
           Login to EduNexus
         </h1>
+
+        <p className="text-red-400 text-lg text-center mb-3">{message}</p>
 
         <form className="flex flex-col gap-6" onSubmit={LoginSubmit}>
           <div>

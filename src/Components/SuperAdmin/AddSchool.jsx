@@ -12,6 +12,7 @@ const AddSchool = () => {
     address: "",
     principalName: "",
     contactNumber: "",
+    email: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ const AddSchool = () => {
         address: "",
         principalName: "",
         contactNumber: "",
+        email: ""
       });
 
       Swal.fire({
@@ -128,6 +130,25 @@ const AddSchool = () => {
                 onChange={handleChange}
                 required
                 placeholder="Complete address of the school"
+                className="w-full bg-transparent outline-none"
+              />
+            </div>
+          </div>
+
+          {/* email full width */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Email
+            </label>
+            <div className="flex items-center gap-3 rounded-xl border border-gray-300 px-4 py-3 bg-gray-50">
+              <MapPin size={20} className="text-indigo-600" />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="Email of the school"
                 className="w-full bg-transparent outline-none"
               />
             </div>

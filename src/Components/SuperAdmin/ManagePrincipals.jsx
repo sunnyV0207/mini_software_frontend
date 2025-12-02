@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, User, School, Eye, Trash2, PlusCircle } from "lucide-react";
+import { Search, User, School, Eye, Trash2, PlusCircle, RefreshCcw } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -35,32 +35,50 @@ const ManagePrincipals = () => {
     fetchPrincipals();
   }, []);
 
-  const deletePrincipal = async (principalId) => {
+  const updatePrincipalStatus = async (principalId) => {
     await axios.delete(
-      `${import.meta.env.VITE_BACKEND_URL}/api/principal/${principalId}/delete`
+      `${import.meta.env.VITE_BACKEND_URL}/api/principal/${principalId}/update-status`
     ).then((res) => {
-      setPrincipals(principals.filter(p => p._id !== principalId));
-      setFilteredPrincipals(filteredPrincipals.filter(p => p._id !== principalId));
-      alert("Principal removed successfully.");
+      // alert("Principal status updated successfully.");
+      setFilteredPrincipals((prevPrincipals)=>
+        prevPrincipals.map((principal)=>
+          principal._id === principalId ? {...principal, status: principal.status === "Active" ? "Inactive" : "Active"  } : principal
+        ))
       navigate("/super-admin/manage-principals");
     }).catch((err) => {
-      console.error("Error removing principal:", err);
-      alert("Failed to remove principal. Please try again.");
+      console.error("Error updating principal status:", err);
+      alert("Failed to update principal status. Please try again.");
     });
   };
 
-  const removePrincipal = async (principalId) => {
+  const deactivatePrincipal = async (principalId) => {
     Swal.fire({
-      title: 'Are you sure?',
-      text: "This action cannot be undone!",
+      title: 'Warning',
+      text: "Are you sure you want to deactivate principal? You can later activate it.",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, remove principal!'
+      confirmButtonText: 'Yes'
     }).then((result) => {
       if (result.isConfirmed) {
-        deletePrincipal(principalId);
+        updatePrincipalStatus(principalId);
+      }
+    });
+  };
+
+  const activatePrincipal = async (principalId) => {
+    Swal.fire({
+      title: 'Warning',
+      text: "Are you sure you want to activate principal? You can later deactivate it.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updatePrincipalStatus(principalId);
       }
     });
   };
@@ -153,13 +171,23 @@ const ManagePrincipals = () => {
                   View
                 </button>
 
-                <button
-                  onClick={()=>removePrincipal(principal._id)}
-                  className="flex items-center gap-2 border border-red-600 text-red-600 px-4 py-2 rounded-xl hover:bg-red-50 transition-all"
-                >
-                  <Trash2 size={18} />
-                  Remove
-                </button>
+                {
+                  principal.status === "Active" ?
+                  <button
+                    onClick={()=>deactivatePrincipal(principal._id)}
+                    className="flex items-center gap-2 border border-red-600 text-red-600 px-4 py-2 rounded-xl hover:bg-red-50 transition-all"
+                  >
+                    <Trash2 size={18} />
+                    Deactivate
+                  </button> :
+                  <button
+                    onClick={()=>activatePrincipal(principal._id)}
+                    className="flex items-center gap-2 border border-blue-600 text-blue-600 px-4 py-2 rounded-xl hover:bg-blue-50 transition-all"
+                  >
+                    <RefreshCcw size={18} />
+                    Activate
+                  </button>
+                }
               </div>
 
             </div>

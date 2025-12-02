@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import {
@@ -9,49 +9,56 @@ import {
   FaPhone,
   FaSchool,
   FaLock,
-  FaVenusMars,
+  FaVenusMars
 } from "react-icons/fa";
 
-export const AddPrincipalForm = () => {
+export const EditTeacher = () => {
   const navigate = useNavigate();
-  const [schools, setSchools] = useState([]);
-  const [formData, setFormData] = useState({
-    name: "",
+  const {teacherId} = useParams()
+
+  const [teacher,setTeacher] = useState(null)
+  const [formData,setFormData] = useState({
+    fullName: "",
     email: "",
+    assignedClass: "",
+    assignedSection: "",
     phone: "",
-    gender: "",
-    schoolId: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
-  const [schoolCode, setSchoolCode] = useState("");
+    gender: ""
+  })
+  const [message,setMessage] = useState("")
+  const [loading,setLoading] = useState(true)
+  const [saving,setSaving] = useState(false)
 
   const classes = Array.from({ length: 12 }, (_, i) => i + 1);
   const sections = ["A", "B", "C", "D"];
 
-  useEffect(() => {
-    const fetchSchools = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/school/fetch-schools`
-        );
-        setSchools(res.data.data.schools);
-      } catch (err) {
-        setMessage({ type: "error", text: err.response?.data?.message });
-      }
-    };
+  const fetchTeacher = (teacherId) => {
+    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/teacher/${teacherId}/get-teacher`)
+    .then((res)=>{
+        // console.log(res)
+        const teacher = res.data.data;
+        setTeacher(teacher)
+        setFormData((prev)=>({
+          ...prev,
+          fullName: teacher.name || "",
+          email: teacher.email || "",
+          assignedClass: teacher.class.classNumber || "",
+          assignedSection: teacher.class.section || "",
+          phone: teacher.phone || "",
+          gender: teacher.gender || ""
+        }))
+        setLoading(false)
+    })
+    .catch((err)=>{
+        console.log(err)
+        setLoading(false)
+        navigate('/school')
+    })
+  }
 
-    fetchSchools();
-  }, []);
-
-  useEffect(() => {
-    const selectedSchool = schools.find((s) => s._id === formData.schoolId);
-    if (selectedSchool) {
-      setSchoolCode(selectedSchool.schoolCode);
-    }
-  }, [formData.schoolId]);
+  useEffect(()=>{
+    fetchTeacher(teacherId)
+  },[])
 
   // Change handler
   const handleChange = (e) => {
@@ -64,62 +71,51 @@ export const AddPrincipalForm = () => {
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true)
     setMessage({ type: "", text: "" });
-
-    if (formData.password !== formData.confirmPassword) {
-      setMessage({ type: "error", text: "Passwords do not match." });
-      setLoading(false);
-      return;
-    }
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/principal/add-principal`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/teacher/${teacherId}/edit-teacher`,
         formData
       );
+
+      // console.log(res)
 
       setMessage({ type: "success", text: "Principal added successfully!" });
 
       setFormData({
-        name: "",
+        fullName: "",
         email: "",
         phone: "",
         gender: "",
         schoolId: "",
         password: "",
         confirmPassword: "",
+        assignedClass: "",
+        assignedSection: ""
       });
 
-      navigate("/super-admin");
+      navigate("/school");
     } catch (err) {
+      console.log(err)
       const message = err.response?.data?.message || "Something went wrong.";
-      if (message === "School already has a principal") {
-        Swal.fire({
-          title: "School already has a principal",
-          text: "Do you want to assign a new principal to this school now?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Yes",
-          cancelButtonText: "No",
-          confirmButtonColor: "#4F46E5",
-          cancelButtonColor: "#6B7280",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            navigate(`/super-admin/school/${schoolCode}/re-assign-principal`);
-          }
-        });
-      }
       setMessage({ type: "error", text: message });
-    } finally {
-      setLoading(false);
+    } finally{
+        setSaving(false)
     }
   };
+
+  if(loading){
+    return (
+        <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    )
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white shadow-lg rounded-xl p-8 mt-6">
       <h2 className="text-3xl font-bold mb-6 text-indigo-700">
-        Add New Principal
+        Edit Teacher details
       </h2>
 
       {message.text && (
@@ -143,9 +139,9 @@ export const AddPrincipalForm = () => {
             <FaUser className="text-gray-500 mr-2" />
             <input
               type="text"
-              name="name"
+              name="fullName"
               className="flex-1 outline-none"
-              value={formData.name}
+              value={formData.fullName}
               onChange={handleChange}
               required
             />
@@ -165,28 +161,6 @@ export const AddPrincipalForm = () => {
               onChange={handleChange}
               required
             />
-          </div>
-        </div>
-
-        {/* SELECT SCHOOL */}
-        <div>
-          <label className="font-medium">Select School</label>
-          <div className="flex items-center border rounded-lg p-2 mt-1">
-            <FaSchool className="text-gray-500 mr-2" />
-            <select
-              name="schoolId"
-              className="flex-1 outline-none"
-              value={formData.schoolId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Choose School</option>
-              {schools.map((school) => (
-                <option key={school._id} value={school._id}>
-                  {school.schoolName}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
@@ -228,47 +202,13 @@ export const AddPrincipalForm = () => {
           </div>
         </div>
 
-        {/* PASSWORD + CONFIRM PASSWORD */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <div>
-            <label className="font-medium">Password</label>
-            <div className="flex items-center border rounded-lg p-2 mt-1">
-              <FaLock className="text-gray-500 mr-2" />
-              <input
-                type="password"
-                name="password"
-                className="flex-1 outline-none"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="font-medium">Confirm Password</label>
-            <div className="flex items-center border rounded-lg p-2 mt-1">
-              <FaLock className="text-gray-500 mr-2" />
-              <input
-                type="password"
-                name="confirmPassword"
-                className="flex-1 outline-none"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-        </div>
-
         {/* SUBMIT */}
         <button
           type="submit"
           disabled={loading}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg shadow-md transition"
         >
-          {loading ? "Adding..." : "Add Principal"}
+          {saving ? "Saving..." : "Save"}
         </button>
       </form>
     </div>

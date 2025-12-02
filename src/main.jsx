@@ -25,6 +25,10 @@ import { SchoolLayout } from './Components/School/SchoolLayout.jsx';
 import { SchoolDashboard } from './Components/School/SchoolDashboard.jsx';
 import { AddClass } from './Components/School/AddClass.jsx';
 import { AddTeacher } from './Components/School/AddTeacher.jsx';
+import { ManageTeachers } from './Components/School/ManageTeachers.jsx';
+import { EditTeacher } from './Components/School/EditTeacher.jsx';
+import {ManageClasses} from './Components/School/ManageClasses.jsx';
+import {AddStudent} from './Components/School/AddStudent.jsx';
 
 const router = createBrowserRouter([
   {
@@ -118,12 +122,28 @@ const router = createBrowserRouter([
             element: <SchoolDashboard />
           },
           {
+            path: ":schoolCode/teachers",
+            element: <ManageTeachers />
+          },
+          {
             path: ":schoolCode/classes/add",
             element: <AddClass />
           },
           {
             path: ':schoolCode/teachers/add',
             element: <AddTeacher />
+          },
+          {
+            path: ":schoolCode/students/add",
+            element: <AddStudent />
+          },
+          {
+            path: 'teacher/:teacherId/edit',
+            element: <EditTeacher />
+          },
+          {
+            path: ':schoolCode/classes',
+            element: <ManageClasses />
           }
         ]
       }

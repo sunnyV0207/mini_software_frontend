@@ -9,7 +9,8 @@ import {
   School,
   Edit,
   Trash2,
-  ShieldCheck
+  ShieldCheck,
+  RefreshCcw
 } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -38,30 +39,46 @@ const ParticularPrincipal = () => {
     fetchPrincipal();
   }, []);
 
-  const deletePrincipal = async () => {
+  const updatePrincipalStatus = async () => {
     await axios.delete(
-      `${import.meta.env.VITE_BACKEND_URL}/api/principal/${principalId}/delete`
+      `${import.meta.env.VITE_BACKEND_URL}/api/principal/${principalId}/update-status`
     ).then((res) => {
-      alert("Principal removed successfully.");
+      // alert("Principal status updated successfully.");
       navigate("/super-admin/manage-principals");
     }).catch((err) => {
-      console.error("Error removing principal:", err);
-      alert("Failed to remove principal. Please try again.");
+      console.error("Error updating principal status:", err);
+      alert("Failed to update principal status. Please try again.");
     });
   };
 
-  const removePrincipal = async () => {
+  const deactivatePrincipal = async () => {
     Swal.fire({
-      title: 'Are you sure?',
-      text: "This action cannot be undone!",
+      title: 'Warning',
+      text: "Are you sure you want to deactivate principal? You can later activate it.",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, remove principal!'
+      confirmButtonText: 'Yes'
     }).then((result) => {
       if (result.isConfirmed) {
-        deletePrincipal();
+        updatePrincipalStatus();
+      }
+    });
+  };
+
+  const activatePrincipal = async () => {
+    Swal.fire({
+      title: 'Warning',
+      text: "Are you sure you want to activate principal? You can later deactivate it.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updatePrincipalStatus();
       }
     });
   };
@@ -203,13 +220,23 @@ const ParticularPrincipal = () => {
           Edit Principal
         </button>
 
-        <button
-          onClick={removePrincipal}
-          className="px-6 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-2 shadow"
-        >
-          <Trash2 size={20} />
-          Remove Principal
-        </button>
+        {
+          principal.status === "Active" ?
+          <button
+            onClick={deactivatePrincipal}
+            className="px-6 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition flex items-center gap-2 shadow"
+          >
+            <Trash2 size={20} />
+            Deactivate Principal
+          </button> :
+          <button
+            onClick={activatePrincipal}
+            className="px-6 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-2 shadow"
+          >
+            <RefreshCcw size={20} />
+            Activate Principal
+          </button>
+        }
 
       </div>
     </div>

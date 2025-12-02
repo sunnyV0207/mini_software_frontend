@@ -72,6 +72,11 @@ function SchoolDashboard() {
       navigate("/login");
       return;
     }
+
+    if(parsedUser.status !== "Active"){
+      navigate('/login',{state: {message:"User has been blocked by Admin. Kindly contact admin"}})
+    }
+
     if(parsedUser.school){
       fetchSchololData(parsedUser.school._id);
     }
@@ -128,10 +133,10 @@ function SchoolDashboard() {
         <nav className="flex flex-col gap-2 mt-10">
           {[ 
             { to: "/school/dashboard", label: "Dashboard", icon: <FaTachometerAlt size={20} /> },
-            { to: "/principal/teachers", label: "Manage Teachers", icon: <FaChalkboardTeacher size={20} /> },
+            { to: `/school/${school.schoolCode}/teachers`, label: "Manage Teachers", icon: <FaChalkboardTeacher size={20} /> },
             { to: "/principal/students", label: "Manage Students", icon: <FaUserGraduate size={20} /> },
             { to: "/principal/parents", label: "Manage Parents", icon: <FaUsers size={20} /> },
-            { to: "/principal/classes", label: "Manage Classes", icon: <FaSchool size={20} /> },
+            { to: `/school/${school.schoolCode}/classes`, label: "Manage Classes", icon: <FaSchool size={20} /> },
           ].map((item, i) => (
             <NavLink
               key={i}
@@ -207,7 +212,7 @@ function SchoolDashboard() {
             color="bg-[#9333ea]"
             icon={<FaUserGraduate size={26} />}
             addLabel="Add Student"
-            onAdd={() => navigate("/principal/students/add")}
+            onAdd={() => navigate(`/school/${school.schoolCode}/students/add`)}
             onClick={() => navigate("/principal/students")}
           />
 
