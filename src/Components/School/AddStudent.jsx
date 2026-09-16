@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import { FaUser, FaEnvelope, FaPhone, FaVenusMars, FaDoorOpen, FaUsers, FaKey } from "react-icons/fa";
 
-export const AddStudent = ()=> {
+export const AddStudent = () => {
+  const { schoolCode } = useParams();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -40,9 +43,20 @@ export const AddStudent = ()=> {
     setMessage({ type: "", text: "" });
 
     try {
+      const loggedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const targetSchoolCode =
+        schoolCode ||
+        (typeof loggedUser.school === "object"
+          ? loggedUser.school?.schoolCode
+          : undefined);
+
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/student/add-student`,
-        formData
+        {
+          ...formData,
+          schoolCode: targetSchoolCode,
+        },
+        { withCredentials: true }
       );
 
       setMessage({ type: "success", text: "Student added successfully!" });
