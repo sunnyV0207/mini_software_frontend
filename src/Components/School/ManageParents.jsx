@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-  FaUserTie,
+  FaUsers,
   FaTrash,
   FaEdit,
   FaSearch,
   FaPhone,
   FaEnvelope,
-  FaSchool,
+  FaUserGraduate,
+  FaBriefcase,
+  FaMapMarkerAlt,
   FaTimes,
   FaEye,
   FaFilter,
@@ -16,48 +18,45 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const ManageTeachers = () => {
+export const ManageParents = () => {
   const navigate = useNavigate();
   const { schoolCode } = useParams();
-  const [teachers, setTeachers] = useState([]);
+  const [parents, setParents] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedSection, setSelectedSection] = useState("");
+  const [childrenFilter, setChildrenFilter] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [selectedTeacher, setSelectedTeacher] = useState(null); // For Card Modal
+  const [selectedParent, setSelectedParent] = useState(null); // For Card Modal
 
-  const classes = Array.from({ length: 12 }, (_, i) => i + 1);
-  const sections = ["A", "B", "C", "D"];
-
-  // Fetch Teachers
-  const fetchTeachers = async () => {
+  // Fetch Parents
+  const fetchParents = async () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/school/${schoolCode}/teachers/get-teachers`
+        `${import.meta.env.VITE_BACKEND_URL}/api/school/${schoolCode}/parents/get-parents`
       );
-      const teachersArray = Array.isArray(response.data.data)
+      const parentsArray = Array.isArray(response.data?.data)
         ? response.data.data
         : [];
-      setTeachers(teachersArray);
+      setParents(parentsArray);
     } catch (error) {
-      console.error("Error fetching teachers:", error);
+      console.error("Error fetching parents:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTeachers();
+    fetchParents();
   }, [schoolCode]);
 
-  const deactivateTeacher = (teacherId, e) => {
+  // Deactivate Parent
+  const deactivateParent = (parentId, e) => {
     if (e) e.stopPropagation();
 
     Swal.fire({
-      title: "Deactivate Teacher",
-      text: "Are you sure you want to deactivate this teacher? You can reactivate them later.",
+      title: "Deactivate Parent",
+      text: "Are you sure you want to deactivate this parent? You can reactivate them later.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Deactivate",
@@ -68,44 +67,45 @@ const ManageTeachers = () => {
       if (result.isConfirmed) {
         try {
           await axios.patch(
-            `${import.meta.env.VITE_BACKEND_URL}/api/teacher/update-teacher-status/${teacherId}`
+            `${import.meta.env.VITE_BACKEND_URL}/api/parent/update-parent-status/${parentId}`
           );
-          setTeachers((prevTeacher) =>
-            prevTeacher.map((teacher) =>
-              teacher._id === teacherId ? { ...teacher, status: "Inactive" } : teacher
+          setParents((prev) =>
+            prev.map((parent) =>
+              parent._id === parentId ? { ...parent, status: "Inactive" } : parent
             )
           );
-          if (selectedTeacher && selectedTeacher._id === teacherId) {
-            setSelectedTeacher((prev) => ({ ...prev, status: "Inactive" }));
+          if (selectedParent && selectedParent._id === parentId) {
+            setSelectedParent((prev) => ({ ...prev, status: "Inactive" }));
           }
           Swal.fire({
             icon: "success",
             title: "Deactivated",
-            text: "Teacher has been deactivated.",
+            text: "Parent account has been deactivated.",
             timer: 1500,
             showConfirmButton: false,
           });
         } catch (error) {
-          console.error("Error deactivating teacher:", error);
+          console.error("Error deactivating parent:", error);
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: error.response?.data?.message || "Failed to deactivate teacher.",
+            text: error.response?.data?.message || "Failed to deactivate parent.",
           });
         }
       }
     });
   };
 
-  const renewTeacher = (teacherId, e) => {
+  // Reactivate Parent
+  const reactivateParent = (parentId, e) => {
     if (e) e.stopPropagation();
 
     Swal.fire({
-      title: "Renew Teacher",
-      text: "Are you sure you want to renew/reactivate this teacher?",
+      title: "Activate Parent",
+      text: "Are you sure you want to activate this parent?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Renew",
+      confirmButtonText: "Activate",
       cancelButtonText: "Cancel",
       confirmButtonColor: "#4F46E5",
       cancelButtonColor: "#6B7280",
@@ -113,56 +113,59 @@ const ManageTeachers = () => {
       if (result.isConfirmed) {
         try {
           await axios.patch(
-            `${import.meta.env.VITE_BACKEND_URL}/api/teacher/update-teacher-status/${teacherId}`
+            `${import.meta.env.VITE_BACKEND_URL}/api/parent/update-parent-status/${parentId}`
           );
-          setTeachers((prevTeacher) =>
-            prevTeacher.map((teacher) =>
-              teacher._id === teacherId ? { ...teacher, status: "Active" } : teacher
+          setParents((prev) =>
+            prev.map((parent) =>
+              parent._id === parentId ? { ...parent, status: "Active" } : parent
             )
           );
-          if (selectedTeacher && selectedTeacher._id === teacherId) {
-            setSelectedTeacher((prev) => ({ ...prev, status: "Active" }));
+          if (selectedParent && selectedParent._id === parentId) {
+            setSelectedParent((prev) => ({ ...prev, status: "Active" }));
           }
           Swal.fire({
             icon: "success",
             title: "Activated",
-            text: "Teacher has been activated successfully.",
+            text: "Parent account has been activated.",
             timer: 1500,
             showConfirmButton: false,
           });
         } catch (error) {
-          console.error("Error activating teacher:", error);
+          console.error("Error activating parent:", error);
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: error.response?.data?.message || "Failed to activate teacher.",
+            text: error.response?.data?.message || "Failed to activate parent.",
           });
         }
       }
     });
   };
 
-  // Filter teachers
-  const filteredTeachers = teachers.filter((t) => {
+  // Filter parents
+  const filteredParents = parents.filter((p) => {
     const term = search.toLowerCase();
     const matchesSearch =
-      (t.name && t.name.toLowerCase().includes(term)) ||
-      (t.email && t.email.toLowerCase().includes(term)) ||
-      (t.phone && t.phone.toLowerCase().includes(term));
+      (p.name && p.name.toLowerCase().includes(term)) ||
+      (p.email && p.email.toLowerCase().includes(term)) ||
+      (p.phone && p.phone.toLowerCase().includes(term)) ||
+      (p.occupation && p.occupation.toLowerCase().includes(term)) ||
+      (Array.isArray(p.children) &&
+        p.children.some(
+          (child) => child.name && child.name.toLowerCase().includes(term)
+        ));
 
     const matchesStatus =
       statusFilter === "All" ||
-      (t.status && t.status.toLowerCase() === statusFilter.toLowerCase());
+      (p.status && p.status.toLowerCase() === statusFilter.toLowerCase());
 
-    const matchesClass =
-      selectedClass === "" ||
-      (t.class && String(t.class.classNumber) === String(selectedClass));
+    const childrenCount = Array.isArray(p.children) ? p.children.length : 0;
+    const matchesChildren =
+      childrenFilter === "All" ||
+      (childrenFilter === "WithChildren" && childrenCount > 0) ||
+      (childrenFilter === "NoChildren" && childrenCount === 0);
 
-    const matchesSection =
-      selectedSection === "" ||
-      (t.class && t.class.section === selectedSection);
-
-    return matchesSearch && matchesStatus && matchesClass && matchesSection;
+    return matchesSearch && matchesStatus && matchesChildren;
   });
 
   return (
@@ -171,30 +174,30 @@ const ManageTeachers = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2.5">
-            <FaUserTie className="text-indigo-600" /> Manage Teachers
+            <FaUsers className="text-indigo-600" /> Manage Parents
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Browse staff list, filter records, or click any teacher to view the detailed profile card.
+            Browse parent contacts, search by family details, or click any parent to view their full profile card.
           </p>
         </div>
 
         <button
-          onClick={() => navigate(`/school/${schoolCode}/teachers/add`)}
+          onClick={() => navigate(`/school/${schoolCode}/parents/add`)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl shadow-md transition-all self-start sm:self-auto font-medium"
         >
           <PlusCircle size={20} />
-          Add Teacher
+          Add Parent
         </button>
       </div>
 
       {/* Filter and Search Bar */}
       <div className="bg-white shadow-sm border border-gray-100 p-4 rounded-2xl mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-        {/* Search Input */}
+        {/* Search */}
         <div className="sm:col-span-2 flex items-center gap-3 bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-200">
           <FaSearch className="text-gray-400 text-base flex-shrink-0" />
           <input
             type="text"
-            placeholder="Search by teacher name, email, phone..."
+            placeholder="Search by parent name, email, phone, occupation, child..."
             className="flex-1 bg-transparent outline-none text-sm text-gray-800"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -223,20 +226,17 @@ const ManageTeachers = () => {
           </select>
         </div>
 
-        {/* Assigned Class Filter */}
+        {/* Children filter */}
         <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-200">
-          <FaSchool className="text-gray-400 text-xs" />
+          <FaUserGraduate className="text-gray-400 text-xs" />
           <select
-            value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
+            value={childrenFilter}
+            onChange={(e) => setChildrenFilter(e.target.value)}
             className="w-full bg-transparent outline-none text-sm text-gray-700 font-medium cursor-pointer"
           >
-            <option value="">All Classes</option>
-            {classes.map((cls) => (
-              <option key={cls} value={cls}>
-                Class {cls}
-              </option>
-            ))}
+            <option value="All">All Families</option>
+            <option value="WithChildren">With Linked Children</option>
+            <option value="NoChildren">Without Children</option>
           </select>
         </div>
       </div>
@@ -244,16 +244,15 @@ const ManageTeachers = () => {
       {/* Results summary */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
         <span>
-          Showing <strong>{filteredTeachers.length}</strong> of{" "}
-          <strong>{teachers.length}</strong> teachers
+          Showing <strong>{filteredParents.length}</strong> of{" "}
+          <strong>{parents.length}</strong> parents
         </span>
-        {(search || statusFilter !== "All" || selectedClass || selectedSection) && (
+        {(search || statusFilter !== "All" || childrenFilter !== "All") && (
           <button
             onClick={() => {
               setSearch("");
               setStatusFilter("All");
-              setSelectedClass("");
-              setSelectedSection("");
+              setChildrenFilter("All");
             }}
             className="text-indigo-600 hover:text-indigo-800 font-semibold"
           >
@@ -262,17 +261,17 @@ const ManageTeachers = () => {
         )}
       </div>
 
-      {/* Teachers List Format */}
+      {/* Parents List Table */}
       {loading ? (
         <div className="flex justify-center items-center py-24">
           <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
-      ) : filteredTeachers.length === 0 ? (
+      ) : filteredParents.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-          <FaUserTie className="mx-auto text-5xl text-gray-300 mb-3" />
-          <p className="text-gray-700 text-lg font-medium">No teachers found</p>
+          <FaUsers className="mx-auto text-5xl text-gray-300 mb-3" />
+          <p className="text-gray-700 text-lg font-medium">No parents found</p>
           <p className="text-gray-400 text-sm mt-1">
-            Try adjusting your search criteria or register a new teacher.
+            Try adjusting your search filters or click "Add Parent" to register a parent contact.
           </p>
         </div>
       ) : (
@@ -281,31 +280,32 @@ const ManageTeachers = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-100 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  <th className="py-3.5 px-4 sm:px-6">Teacher Details</th>
+                  <th className="py-3.5 px-4 sm:px-6">Parent Details</th>
                   <th className="py-3.5 px-4">Contact</th>
-                  <th className="py-3.5 px-4">Assigned Class</th>
+                  <th className="py-3.5 px-4">Occupation</th>
+                  <th className="py-3.5 px-4">Linked Children</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-sm">
-                {filteredTeachers.map((teacher) => (
+                {filteredParents.map((parent) => (
                   <tr
-                    key={teacher._id}
-                    onClick={() => setSelectedTeacher(teacher)}
+                    key={parent._id}
+                    onClick={() => setSelectedParent(parent)}
                     className="hover:bg-indigo-50/40 transition cursor-pointer group"
                   >
-                    {/* Teacher Details */}
+                    {/* Parent Details */}
                     <td className="py-3.5 px-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg flex-shrink-0 group-hover:scale-105 transition">
-                          <FaUserTie />
+                        <div className="w-10 h-10 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-lg flex-shrink-0 group-hover:scale-105 transition">
+                          <FaUsers />
                         </div>
                         <div>
                           <p className="font-semibold text-gray-900 group-hover:text-indigo-700 transition">
-                            {teacher.name}
+                            {parent.name}
                           </p>
-                          <p className="text-xs text-gray-500">{teacher.email}</p>
+                          <p className="text-xs text-gray-500">{parent.email}</p>
                         </div>
                       </div>
                     </td>
@@ -314,20 +314,41 @@ const ManageTeachers = () => {
                     <td className="py-3.5 px-4 text-gray-600">
                       <span className="flex items-center gap-1.5 text-xs">
                         <FaPhone className="text-gray-400" />
-                        {teacher.phone || "N/A"}
+                        {parent.phone || "N/A"}
                       </span>
                     </td>
 
-                    {/* Assigned Class */}
-                    <td className="py-3.5 px-4">
-                      {teacher.class ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold text-xs border border-indigo-200">
-                          Class {teacher.class.classNumber}-{teacher.class.section}
+                    {/* Occupation */}
+                    <td className="py-3.5 px-4 text-gray-700 text-xs">
+                      {parent.occupation ? (
+                        <span className="inline-flex items-center gap-1 font-medium text-gray-800">
+                          <FaBriefcase className="text-gray-400" size={11} /> {parent.occupation}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-400 italic">
-                          Not Assigned
-                        </span>
+                        <span className="text-gray-400 italic">N/A</span>
+                      )}
+                    </td>
+
+                    {/* Linked Children */}
+                    <td className="py-3.5 px-4">
+                      {parent.children && parent.children.length > 0 ? (
+                        <div className="flex flex-wrap gap-1 items-center">
+                          {parent.children.slice(0, 2).map((child) => (
+                            <span
+                              key={child._id}
+                              className="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-semibold text-[11px] rounded-md border border-indigo-200"
+                            >
+                              {child.name}
+                            </span>
+                          ))}
+                          {parent.children.length > 2 && (
+                            <span className="text-[11px] text-gray-500 font-medium">
+                              +{parent.children.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">No Children</span>
                       )}
                     </td>
 
@@ -335,12 +356,12 @@ const ManageTeachers = () => {
                     <td className="py-3.5 px-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                          teacher.status === "Active"
+                          parent.status === "Active"
                             ? "bg-green-50 text-green-700 border-green-200"
                             : "bg-red-50 text-red-700 border-red-200"
                         }`}
                       >
-                        {teacher.status || "Active"}
+                        {parent.status || "Active"}
                       </span>
                     </td>
 
@@ -348,34 +369,34 @@ const ManageTeachers = () => {
                     <td className="py-3.5 px-4 sm:px-6 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => setSelectedTeacher(teacher)}
+                          onClick={() => setSelectedParent(parent)}
                           className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                          title="View Teacher Card"
+                          title="View Parent Card"
                         >
                           <FaEye size={15} />
                         </button>
 
                         <button
-                          onClick={() => navigate(`/school/teacher/${teacher._id}/edit`)}
+                          onClick={() => navigate(`/school/parent/${parent._id}/edit`)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Edit Teacher"
+                          title="Edit Parent"
                         >
                           <FaEdit size={15} />
                         </button>
 
-                        {teacher.status === "Active" ? (
+                        {parent.status === "Active" ? (
                           <button
-                            onClick={(e) => deactivateTeacher(teacher._id, e)}
+                            onClick={(e) => deactivateParent(parent._id, e)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            title="Deactivate Teacher"
+                            title="Deactivate Parent"
                           >
                             <FaTrash size={14} />
                           </button>
                         ) : (
                           <button
-                            onClick={(e) => renewTeacher(teacher._id, e)}
+                            onClick={(e) => reactivateParent(parent._id, e)}
                             className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                            title="Activate Teacher"
+                            title="Activate Parent"
                           >
                             <RefreshCw size={14} />
                           </button>
@@ -390,93 +411,123 @@ const ManageTeachers = () => {
         </div>
       )}
 
-      {/* INTERACTIVE TEACHER CARD MODAL */}
-      {selectedTeacher && (
+      {/* INTERACTIVE PARENT CARD MODAL */}
+      {selectedParent && (
         <div
           className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setSelectedTeacher(null)}
+          onClick={() => setSelectedParent(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-md overflow-hidden p-6 sm:p-8 animate-scale-up"
+            className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg overflow-hidden p-6 sm:p-8 animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header with Close Button */}
+            {/* Modal Header */}
             <div className="flex items-start justify-between pb-4 border-b border-gray-100">
               <span
                 className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                  selectedTeacher.status === "Active"
+                  selectedParent.status === "Active"
                     ? "bg-green-50 text-green-700 border-green-200"
                     : "bg-red-50 text-red-700 border-red-200"
                 }`}
               >
-                {selectedTeacher.status || "Active"}
+                {selectedParent.status || "Active"}
               </span>
 
               <button
-                onClick={() => setSelectedTeacher(null)}
+                onClick={() => setSelectedParent(null)}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition"
               >
                 <FaTimes size={18} />
               </button>
             </div>
 
-            {/* Teacher Card Body */}
+            {/* Parent Avatar & Title */}
             <div className="text-center mt-4">
-              <div className="w-20 h-20 mx-auto rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-4xl shadow-inner mb-3">
-                <FaUserTie />
+              <div className="w-20 h-20 mx-auto rounded-full bg-pink-100 text-pink-700 flex items-center justify-center text-4xl shadow-inner mb-3">
+                <FaUsers />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {selectedTeacher.name}
+                {selectedParent.name}
               </h2>
-              <p className="text-xs text-indigo-600 font-semibold uppercase tracking-wider mt-0.5">
-                Teacher Profile
-              </p>
+              {selectedParent.occupation ? (
+                <p className="text-xs text-indigo-600 font-semibold uppercase tracking-wider mt-0.5">
+                  {selectedParent.occupation}
+                </p>
+              ) : (
+                <p className="text-xs text-gray-400 mt-0.5">Parent / Guardian</p>
+              )}
             </div>
 
-            {/* Assigned Class Banner */}
-            <div className="mt-5 bg-indigo-50/70 border border-indigo-100 p-3.5 rounded-xl text-center">
-              <p className="text-xs text-indigo-500 font-medium">Assigned Class & Section</p>
-              <p className="text-lg font-bold text-indigo-900 mt-0.5">
-                {selectedTeacher.class
-                  ? `Class ${selectedTeacher.class.classNumber} - Section ${selectedTeacher.class.section}`
-                  : "No Class Assigned Currently"}
-              </p>
-            </div>
-
-            {/* Details List */}
-            <div className="mt-5 space-y-3 text-sm text-gray-700 border-t border-gray-100 pt-4">
+            {/* Contact & Address */}
+            <div className="mt-5 space-y-2.5 text-sm text-gray-700 border-t border-gray-100 pt-4">
               <div className="flex items-center gap-3">
                 <FaEnvelope className="text-gray-400 text-base flex-shrink-0" />
-                <span className="truncate">{selectedTeacher.email}</span>
+                <span className="truncate">{selectedParent.email}</span>
               </div>
               <div className="flex items-center gap-3">
                 <FaPhone className="text-gray-400 text-base flex-shrink-0" />
-                <span>{selectedTeacher.phone || "Not provided"}</span>
+                <span>{selectedParent.phone || "Not provided"}</span>
               </div>
+              {selectedParent.address && (
+                <div className="flex items-center gap-3">
+                  <FaMapMarkerAlt className="text-gray-400 text-base flex-shrink-0" />
+                  <span className="truncate">{selectedParent.address}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Linked Children List */}
+            <div className="mt-5 bg-indigo-50/60 p-4 rounded-xl border border-indigo-100">
+              <p className="text-xs font-bold text-indigo-900 mb-2.5 flex items-center gap-1.5">
+                <FaUserGraduate className="text-indigo-600" />
+                Linked Children ({selectedParent.children?.length || 0}):
+              </p>
+
+              {selectedParent.children && selectedParent.children.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedParent.children.map((child) => (
+                    <div
+                      key={child._id}
+                      className="bg-white p-2.5 rounded-lg border border-indigo-100 flex items-center justify-between text-xs"
+                    >
+                      <span className="font-semibold text-gray-800">{child.name}</span>
+                      {child.class ? (
+                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-bold rounded">
+                          Class {child.class.classNumber}-{child.class.section}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 italic">No class assigned</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 italic">No students linked to this parent.</p>
+              )}
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">
               <button
                 onClick={() => {
-                  setSelectedTeacher(null);
-                  navigate(`/school/teacher/${selectedTeacher._id}/edit`);
+                  setSelectedParent(null);
+                  navigate(`/school/parent/${selectedParent._id}/edit`);
                 }}
                 className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold text-sm transition shadow-sm"
               >
-                <FaEdit size={14} /> Edit Teacher
+                <FaEdit size={14} /> Edit Parent
               </button>
 
-              {selectedTeacher.status === "Active" ? (
+              {selectedParent.status === "Active" ? (
                 <button
-                  onClick={() => deactivateTeacher(selectedTeacher._id)}
+                  onClick={() => deactivateParent(selectedParent._id)}
                   className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2.5 px-4 rounded-xl font-semibold text-sm transition"
                 >
                   <FaTrash size={13} /> Deactivate
                 </button>
               ) : (
                 <button
-                  onClick={() => renewTeacher(selectedTeacher._id)}
+                  onClick={() => reactivateParent(selectedParent._id)}
                   className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 py-2.5 px-4 rounded-xl font-semibold text-sm transition"
                 >
                   <RefreshCw size={14} /> Activate
@@ -489,6 +540,4 @@ const ManageTeachers = () => {
     </div>
   );
 };
-
-export { ManageTeachers };
 

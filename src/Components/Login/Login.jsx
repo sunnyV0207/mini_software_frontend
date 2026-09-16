@@ -1,7 +1,7 @@
-import { use, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useNavigate,useLocation } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -12,7 +12,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message,setMessage] = useState(location.state?.message || '')
+  const [message, setMessage] = useState(location.state?.message || "");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,30 +23,36 @@ export default function Login() {
       setPassword(value);
     }
   };
-  
-  const LoginSubmit = (e) => {
+
+  const LoginSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/user/login`,{email,password},{withCredentials:true})
-    .then((res)=>{
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/login`,
+        { email, password },
+        { withCredentials: true }
+      );
       const user = res.data.data.user;
       localStorage.setItem("user", JSON.stringify(user));
-      const role = res.data.data.user.role
-      if(role === "Super Admin"){
-        navigate('/super-admin');
-      }else if(role === "Principal"){
-        navigate('/school');
+      const role = user.role;
+      if (role === "Super Admin") {
+        navigate("/super-admin");
+      } else if (role === "Principal") {
+        navigate("/school");
+      } else if (role === "Teacher") {
+        navigate("/teacher");
+      } else {
+        navigate("/");
       }
-    })
-    .catch((err)=>{
-      setMessage(err.response?.data?.message)
-      // Swal.fire({
-      //   icon: 'error',
-      //   title: 'Login Failed',
-      //   text: err.response.data.message,
-      // });
-    });
-  }
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a14] px-4">
@@ -59,7 +66,11 @@ export default function Login() {
           Login to EduNexus
         </h1>
 
-        <p className="text-red-400 text-lg text-center mb-3">{message}</p>
+        {message && (
+          <p className="text-red-400 text-sm text-center mb-4 bg-red-950/40 border border-red-500/30 p-2.5 rounded-lg">
+            {message}
+          </p>
+        )}
 
         <form className="flex flex-col gap-6" onSubmit={LoginSubmit}>
           <div>
@@ -68,8 +79,9 @@ export default function Login() {
               type="email"
               name="email"
               required
+              disabled={loading}
               className="w-full px-4 py-3 rounded-lg bg-[#0f0f1f] border border-gray-700 text-gray-200
-              focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none transition"
+              focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="Enter your email"
               value={email}
               onChange={handleChange}
@@ -83,29 +95,41 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 required
+                disabled={loading}
                 className="w-full px-4 py-3 rounded-lg bg-[#0f0f1f] border border-gray-700 text-gray-200
-                focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none transition"
+                focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Enter your password"
                 value={password}
                 onChange={handleChange}
               />
-              <span
+              <button
+                type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3 cursor-pointer text-gray-400 hover:text-white text-lg"
+                className="absolute right-4 top-3 cursor-pointer text-gray-400 hover:text-white text-lg select-none bg-transparent border-none outline-none"
               >
                 {showPassword ? "🙈" : "👁️"}
-              </span>
+              </button>
             </div>
           </div>
 
           {/* Login Button */}
           <motion.button
-            whileTap={{ scale: 0.95 }}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold
-            rounded-lg shadow-lg hover:shadow-indigo-400/30 transition"
+            whileTap={!loading ? { scale: 0.95 } : {}}
+            disabled={loading}
+            className={`w-full py-3 font-semibold rounded-lg shadow-lg transition flex items-center justify-center gap-2 ${loading
+                ? "bg-indigo-600/70 text-gray-200 cursor-not-allowed opacity-80"
+                : "bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-indigo-400/30"
+              }`}
             type="submit"
           >
-            Login
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Logging in...</span>
+              </>
+            ) : (
+              "Login"
+            )}
           </motion.button>
         </form>
 
